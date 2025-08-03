@@ -87,14 +87,14 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div>
       {/* 헤더 */}
-      <header className="flex items-center justify-between px-4 py-3 bg-white border-b">
-        <h1 className="text-lg font-semibold">미니톡</h1>
+      <header>
+        <h1>미니톡</h1>
       </header>
 
       {/* 채팅 영역 */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div>
         {messages.map(msg => (
           <ChatMessage key={msg.id} message={msg} />
         ))}
@@ -102,16 +102,15 @@ export default function Chat() {
       </div>
 
       {/* 입력 영역 */}
-      <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
-        <div className="flex items-center gap-2">
+      <form onSubmit={handleSubmit}>
+        <div>
           <input
             type="text"
-            className="input flex-1"
             placeholder="메시지를 입력하세요"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
-          <button type="submit" className="btn btn-primary">
+          <button type="submit">
             전송
           </button>
         </div>

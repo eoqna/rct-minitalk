@@ -33,7 +33,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               : 'bg-gray-100 text-gray-900 rounded-bl-none animate-slide-right'
           }`}
         >
-          <p className="break-words">{message.content}</p>
+          <p>{message.content}</p>
         </div>
         <div
           className={`flex items-center gap-1 text-xs text-gray-500 mt-1 ${
@@ -42,7 +42,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         >
           {message.isMine && (
             <>
-              {message.isRead && <span className="text-blue-500">읽음</span>}
+              {message.isRead && <span>읽음</span>}
               <span>{getStatusIcon()}</span>
             </>
           )}
