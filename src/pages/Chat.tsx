@@ -4,27 +4,29 @@ import ChatMessage from '../components/ChatMessage'
 import styled from 'styled-components'
 
 export const Container = styled.div`
+  width: 100%;
+  height: 100%;
+  max-width: 360px;
   display: flex;
-  width: 360px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
   background-color: #d0e7ff;
 `
 
 export const MessageContainer = styled.div`
-  display: flex;
   width: 100%;
   height: 95%;
+  display: flex;
+  flex-direction: column;
   background-color: #d0e7ff;
 `
 
-export const MessageLayout = styled.div<{ isMine: boolean }>`
+export const MessageLayout = styled.div<{ $isMine: boolean }>`
   display: flex;
   max-width: calc(60% - 20px);
   padding: 10px;
-  background-color: ${({ isMine }) => isMine ? 'yellow' : 'white'};
+  background-color: ${({ $isMine }) => $isMine ? 'yellow' : 'white'};
 `
 
 export const InputContainer = styled.form`
