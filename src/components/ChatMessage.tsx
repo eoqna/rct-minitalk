@@ -8,7 +8,7 @@ interface ChatMessageProps {
 
 const Container = styled.div<{ $isMine: boolean }>`
   display: flex;
-  margin-bottom: 4rem;
+  margin-bottom: 1rem;
   animation: fade-in 0.5s ease-in-out;
   ${({ $isMine }) => $isMine && 'justify-content: flex-end'}
 `;
@@ -19,13 +19,13 @@ const MessageLayout = styled.div<{ $isMine: boolean }>`
 `;
 
 const ContentLayout = styled.div<{ $isMine: boolean }>`
-  padding: 8px 12px;
-  border-radius: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
   transition: all 0.2s ease-in-out;
   color: black;
   ${({ $isMine }) => $isMine 
-    ? 'background: yellow; border-bottom-right-radius: 0; animation: slide-left 0.2s ease-in-out;'
-    : 'background: white; border-bottom-left-radius: 0; animation: slide-right 0.2s ease-in-out;'
+    ? 'background: yellow; animation: slide-left 0.2s ease-in-out; margin-right: 8px;'
+    : 'background: white; animation: slide-right 0.2s ease-in-out; margin-left: 8px;'
 }
 `;
 
@@ -38,6 +38,7 @@ const SideMessageLayout = styled.div<{ $isMine: boolean }>`
   gap: 4px;
   font-size: 12px;
   color: #666;
+  ${({ $isMine }) => $isMine ? 'margin-right: 8px;' : 'margin-left: 8px;'}
 `;
 
 const ConfirmedText = styled.span``;

@@ -20,6 +20,17 @@ export const MessageContainer = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #d0e7ff;
+  overflow-y: auto;
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #aaa;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 `
 
 export const MessageLayout = styled.div<{ $isMine: boolean }>`
