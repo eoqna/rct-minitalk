@@ -1,9 +1,10 @@
 import styled from 'styled-components'
-import type { Message } from '../types/chat'
+import type { ApiResponse } from '../types'
 import dayjs from 'dayjs'
+import useAppStore from '../store/useAppStore';
 
 interface ChatMessageProps {
-  message: Message
+  message: ApiResponse.Message
 }
 
 const Container = styled.div<{ $isMine: boolean }>`
@@ -44,32 +45,20 @@ const SideMessageLayout = styled.div<{ $isMine: boolean }>`
 const ConfirmedText = styled.span``;
 
 export default function ChatMessage({ message }: ChatMessageProps) {
-  const messageTime = dayjs(message.createdAt).format('HH:mm')
-  
-  const getStatusIcon = () => {
-    switch (message.status) {
-      case 'sending':
-        return '⏳'
-      case 'sent':
-        return '✓'
-      case 'failed':
-        return '❌'
-      default:
-        return null
-    }
-  }
+  const { user } = useAppStore()
+  const messageTime = dayjs(message.created_at).format('HH:mm')
   
   return (
-    <Container $isMine={message.isMine}>
-      <MessageLayout $isMine={message.isMine}>
-        <ContentLayout $isMine={message.isMine}>
+    <Container $isMine={message.user_id === user?.user_id}>
+      <MessageLayout $isMine={message.user_id === user?.user_id}>
+        <ContentLayout $isMine={message.user_id === user?.user_id}>
           <MessageText>{message.content}</MessageText>
         </ContentLayout>
-        <SideMessageLayout $isMine={message.isMine}>
-          {message.isMine && (
+        <SideMessageLayout $isMine={message.user_id === user?.user_id}>
+          {message.user_id === user?.user_id && (
             <>
-              {message.isRead && <ConfirmedText>읽음</ConfirmedText>}
-              <ConfirmedText>{getStatusIcon()}</ConfirmedText>
+              {/* {message.isRead && <ConfirmedText>읽음</ConfirmedText>} */}
+              {/* <ConfirmedText>{getStatusIcon()}</ConfirmedText> */}
             </>
           )}
           <ConfirmedText>{messageTime}</ConfirmedText>

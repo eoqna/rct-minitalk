@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { Container } from '../util/style'
+import { supabase } from '../util/supabase'
+import useAppStore from '../store/useAppStore'
 
 const Title = styled.h1`
   font-size: 3vmin;
@@ -35,10 +37,11 @@ const Button = styled.button`
 `
 
 const Login = () => {
+  const { setUser } = useAppStore()
   const [pin, setPin] = useState('')
   const navigate = useNavigate()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!pin.length || pin.length < 4) {
@@ -46,13 +49,15 @@ const Login = () => {
       return
     }
 
-    if (pin !== '0320') {
-      alert('PIN 번호가 일치하지 않습니다.')
-      return
-    }
+    const { data, error } = await supabase.from('tb_user').select('*').eq('pin', pin)
 
-    navigate('/chat')
-  }
+    if (error) {
+      console.log("error: ", error)
+    } else {
+      setUser(data[0])
+      navigate('/chat')
+    }
+  }, [pin, navigate])
 
   return (
     <Container>
