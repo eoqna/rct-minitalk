@@ -13,17 +13,24 @@ export const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   background-color: #d0e7ff;
+  min-height: -webkit-fill-available;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
 `
 
 export const MessageContainer = styled.div`
   width: 100%;
-  height: 95%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   background-color: #d0e7ff;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; // iOS 스크롤 부드럽게
+  padding-bottom: env(safe-area-inset-bottom);
   &::-webkit-scrollbar {
     width: 8px;
   }
@@ -46,17 +53,20 @@ export const MessageLayout = styled.div<{ $isMine: boolean }>`
 export const InputContainer = styled.form`
   display: flex;
   width: calc(100% - 20px);
-  height: calc(5% - 20px);
-  background-color: #007bff;
   padding: 10px;
+  background-color: #007bff;
+  position: sticky;
+  bottom: 0;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 `
 
 export const Input = styled.input`
   width: calc(100% - 16px);
-  padding: 4px 8px;
+  padding: 8px 12px;
   border: none;
-  font-size: 1.4vmin;
+  font-size: 16px;
   outline: none;
+  margin-bottom: env(safe-area-inset-bottom);
 `
 
 interface MessageQueue {
@@ -64,20 +74,24 @@ interface MessageQueue {
   timestamp: number
 }
 
-const SUBMIT_DELAY = 200 // 1초 디바운스
+const SUBMIT_DELAY = 200 // 0.2초 디바운스
 
 const Chat = () => {
   const { user } = useAppStore()
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<ApiResponse.Message[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const messageQueue = useRef<MessageQueue[]>([])
   const lastSubmitTime = useRef<number>(0)
+  const messageContainerRef = useRef<HTMLDivElement>(null)
+  const lastMessageId = useRef<number | null>(null)
   const navigate = useNavigate()
 
   useEffect(() =>{
-    if (!user) {
+    if (user?.user_id === 0) {
       navigate('/')
     }
   }, []);
@@ -90,14 +104,72 @@ const Chat = () => {
     scrollToBottom()
   }, [messages])
 
-  const getMessages = useCallback(async () => {
-    const { data } = await supabase.from('tb_message').select('*').order('created_at', { ascending: true })
-    setMessages(data || [])
-  }, [])
+  const getMessages = useCallback(async (isInitial: boolean = false) => {
+    if (isLoading || (!hasMore && !isInitial)) return;
+    
+    setIsLoading(true);
+    try {
+      let query = supabase
+        .from('tb_message')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(40);
+
+      if (!isInitial && lastMessageId.current) {
+        query = query.lt('message_id', lastMessageId.current);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('메시지 로드 중 오류 발생:', error);
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        setHasMore(false);
+        return;
+      }
+
+      const sortedData = [...data].sort((a, b) => 
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+
+      if (isInitial) {
+        setMessages(sortedData);
+      } else {
+        setMessages(prev => [...sortedData, ...prev]);
+      }
+
+      lastMessageId.current = data[data.length - 1].message_id;
+      setHasMore(data.length === 40);
+    } catch (error) {
+      console.error('메시지 로드 중 오류 발생:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, hasMore])
+
+  const handleScroll = useCallback(() => {
+    if (!messageContainerRef.current) return;
+    
+    const { scrollTop } = messageContainerRef.current;
+    if (scrollTop === 0 && hasMore && !isLoading) {
+      getMessages(false);
+    }
+  }, [getMessages, hasMore, isLoading]);
+
+  useEffect(() => {
+    const messageContainer = messageContainerRef.current;
+    if (messageContainer) {
+      messageContainer.addEventListener('scroll', handleScroll);
+      return () => messageContainer.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll]);
 
   useEffect(() => {
     // 초기 메시지 로드
-    getMessages()
+    getMessages(true)
 
     // 실시간 구독 설정
     const channel = supabase
@@ -109,30 +181,21 @@ const Chat = () => {
           schema: 'public',
           table: 'tb_message'
         },
-        async (payload) => {
+        (payload) => {
           console.log('새 메시지 감지:', payload)
           
-          // 새로운 메시지 데이터 가져오기
-          const { data: newMessage, error } = await supabase
-            .from('tb_message')
-            .select('*')
-            .eq('message_id', payload.new.message_id)
-            .single()
-
-          if (error) {
-            console.error('새 메시지 조회 실패:', error)
-            return
-          }
-
+          // payload.new에 이미 필요한 데이터가 포함되어 있음
+          const newMessage = payload.new as ApiResponse.Message
+          
           if (newMessage) {
             console.log(newMessage)
             setMessages(prev => [...prev, newMessage])
+            // 새 메시지가 도착하면 자동으로 스크롤
+            setTimeout(scrollToBottom, 100)
           }
         }
       )
-
-    // 구독 시작
-    channel.subscribe((status) => {
+      .subscribe((status) => {
       console.log('실시간 구독 상태:', status)
       
       if (status === 'SUBSCRIBED') {
@@ -192,7 +255,6 @@ const Chat = () => {
       const success = await sendMessage(nextMessage.content)
       if (success) {
         messageQueue.current.shift() // 성공한 메시지 제거
-        setMessage('') // 입력창 초기화
         lastSubmitTime.current = now
       }
     } finally {
@@ -218,6 +280,9 @@ const Chat = () => {
       timestamp: Date.now()
     })
 
+    // 입력창 즉시 초기화 (사용자 경험 개선)
+    setMessage('')
+
     // 큐 처리 시작
     processMessageQueue()
   }, [message, processMessageQueue])
@@ -225,7 +290,8 @@ const Chat = () => {
   return (
     <Container>
       {/* 채팅 영역 */}
-      <MessageContainer>
+      <MessageContainer ref={messageContainerRef}>
+        {isLoading && hasMore && <div style={{ textAlign: 'center', padding: '10px' }}>메시지를 불러오는 중...</div>}
         {messages.map(msg => (
           <ChatMessage key={msg.message_id} message={msg} />
         ))}

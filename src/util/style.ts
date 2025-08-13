@@ -1,11 +1,14 @@
-import styled from "styled-components";
+import styled from 'styled-components'
 
 export const Container = styled.div`
+  width: 100%;
+  height: 100%;
+  max-width: 360px;
   display: flex;
-  width: 360px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
   background-color: #007bff;
+  min-height: -webkit-fill-available; // iOS Safari 대응
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); // iOS 노치 대응
 `

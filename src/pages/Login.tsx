@@ -68,7 +68,7 @@ const Login = () => {
           placeholder="PIN 번호를 입력하세요"
           value={pin}
           onChange={(e) => setPin(e.target.value)}
-          maxLength={6}
+          maxLength={4}
           pattern="[0-9]*"
           inputMode="numeric"
         />

@@ -8,7 +8,7 @@ declare namespace ApiResponse {
   }
 
   interface Message {
-    message_id: string;
+    message_id: number;
     content: string;
     created_at: string;
     user_id: number;
