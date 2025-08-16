@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom'
 export const Container = styled.div`
   width: 100%;
   height: 100%;
-  max-width: 360px;
+  max-width: 480px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -105,9 +105,9 @@ const Chat = () => {
   }, [messages])
 
   const getMessages = useCallback(async (isInitial: boolean = false) => {
-    if (isLoading || (!hasMore && !isInitial)) return;
+    if (isLoading || (!hasMore && !isInitial)) return
     
-    setIsLoading(true);
+    setIsLoading(true)
     try {
       let query = supabase
         .from('tb_message')
@@ -127,7 +127,7 @@ const Chat = () => {
       }
 
       if (!data || data.length === 0) {
-        setHasMore(false);
+        setHasMore(false)
         return;
       }
 
@@ -136,9 +136,9 @@ const Chat = () => {
       );
 
       if (isInitial) {
-        setMessages(sortedData);
+        setMessages(sortedData)
       } else {
-        setMessages(prev => [...sortedData, ...prev]);
+        setMessages(prev => [...sortedData, ...prev])
       }
 
       lastMessageId.current = data[data.length - 1].message_id;
@@ -146,7 +146,7 @@ const Chat = () => {
     } catch (error) {
       console.error('메시지 로드 중 오류 발생:', error);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }, [isLoading, hasMore])
 
@@ -157,7 +157,7 @@ const Chat = () => {
     if (scrollTop === 0 && hasMore && !isLoading) {
       getMessages(false);
     }
-  }, [getMessages, hasMore, isLoading]);
+  }, [getMessages, hasMore, isLoading])
 
   useEffect(() => {
     const messageContainer = messageContainerRef.current;
@@ -165,7 +165,7 @@ const Chat = () => {
       messageContainer.addEventListener('scroll', handleScroll);
       return () => messageContainer.removeEventListener('scroll', handleScroll);
     }
-  }, [handleScroll]);
+  }, [handleScroll])
 
   useEffect(() => {
     // 초기 메시지 로드
@@ -182,17 +182,8 @@ const Chat = () => {
           table: 'tb_message'
         },
         (payload) => {
-          console.log('새 메시지 감지:', payload)
-          
-          // payload.new에 이미 필요한 데이터가 포함되어 있음
-          const newMessage = payload.new as ApiResponse.Message
-          
-          if (newMessage) {
-            console.log(newMessage)
-            setMessages(prev => [...prev, newMessage])
-            // 새 메시지가 도착하면 자동으로 스크롤
-            setTimeout(scrollToBottom, 100)
-          }
+          setMessages(prev => [...prev, payload.new as ApiResponse.Message])
+          console.log(payload.new)
         }
       )
       .subscribe((status) => {
