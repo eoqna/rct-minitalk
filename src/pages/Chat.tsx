@@ -1,33 +1,28 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import type { ApiResponse } from '../types'
-import ChatMessage from '../components/ChatMessage'
+import { ChatMessage } from '../components'
 import styled from 'styled-components'
 import { supabase } from '../util/supabase'
 import useAppStore from '../store/useAppStore'
 import { useNavigate } from 'react-router-dom'
+import send from '../assets/imgs/send.png'
 
 export const Container = styled.div`
   width: 100%;
-  height: 100%;
+  height: calc(97.5% - 8px);
   max-width: 480px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #d0e7ff;
-  min-height: -webkit-fill-available;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
 `
 
 export const MessageContainer = styled.div`
-  width: 100%;
-  flex: 1;
+  width: calc(100% - 2px);
   display: flex;
   flex-direction: column;
-  background-color: #d0e7ff;
+  background-color: #fff;
+  border: 0.5px solid #9cc8c8;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch; // iOS 스크롤 부드럽게
   padding-bottom: env(safe-area-inset-bottom);
@@ -52,21 +47,25 @@ export const MessageLayout = styled.div<{ $isMine: boolean }>`
 
 export const InputContainer = styled.form`
   display: flex;
-  width: calc(100% - 20px);
+  width: calc(100% - 22px);
   padding: 10px;
-  background-color: #007bff;
+  background-color: #bfdfe0;
   position: sticky;
   bottom: 0;
+  border: 0.5px solid #9cc8c8;
   padding-bottom: calc(10px + env(safe-area-inset-bottom));
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 `
 
 export const Input = styled.input`
-  width: calc(100% - 16px);
+  width: calc(80% - 16px);
   padding: 8px 12px;
-  border: none;
+  border: 0.5px solid #9cc8c8;
   font-size: 16px;
   outline: none;
   margin-bottom: env(safe-area-inset-bottom);
+  margin-right: 8px;
 `
 
 interface MessageQueue {
@@ -302,11 +301,26 @@ const Chat = () => {
               handleSubmit(e)
             }
           }}
-          placeholder="메시지를 입력하세요"
         />
+        <Button>
+          <ButtonImage src={send} alt="send" />
+        </Button>
       </InputContainer>
     </Container>
   )
 } 
+
+const Button = styled.div`
+  width: 20%;
+  display: flex;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+`
+
+const ButtonImage = styled.img`
+  width: 100%;
+  object-fit: contain;
+`
 
 export default Chat;

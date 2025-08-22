@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Suspense, lazy } from 'react'
 import styled from 'styled-components'
+import { Header } from './components'
 
 const Container = styled.div`
   width: 100%;
@@ -8,7 +9,6 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
 `
 
 const Login = lazy(() => import('./pages/Login'))
@@ -18,7 +18,8 @@ const App = () => {
   return (
     <Router>
       <Container>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div></div>}>
+          <Header />
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/chat" element={<Chat />} />
